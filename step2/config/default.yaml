@@ -1,0 +1,57 @@
+device             : 'cuda'
+device_idx         : '0'
+device_dataset     : 'cpu'
+
+path_ctnetstep     : "/path/to/ckpt/ctnetstep.pt"
+path_thresholds    : "/path/to/thresholds/validation/thresholds.csv"
+path_resnet        : "/path/to/resnet18-f37072fd.pth"
+path_gpt2          : "/path/to/gpt-2-pubmed-medium"
+
+dataset_name       : "ct_dataset"
+normalization      : "imagenet"
+max_seq_length     : 60
+threshold          : 3
+num_workers_train  : 32
+num_workers_valid  : 4
+batch_size_train   : 8
+batch_size_valid   : 1
+batch_size_sim     : 64
+
+
+sample_method        : 'beam_search'
+beam_size            : 4
+group_size           : 1
+do_sample            : False
+num_return_sequences : 1
+early_stopping       : True
+sample_n             : 1
+num_return_seq       : 1
+early_stopping       : False
+block_trigram        : 1
+
+epochs             : 100
+
+lr_ve              : 0.00005
+lr_decoder         : 0.00005
+weight_decay       : 0.00005
+weight_decay_adamw : 0.01
+amsgrad            : temperature
+
+lr_scheduler       : 'StepLR'
+step_size          : 50
+gamma              : 0.1
+
+path_labels_train  : "/path/to/folder/labels/train.csv"
+path_labels_valid  : "/path/to/folder/labels/valid.csv"
+path_labels_test   : "/path/to/folder/labels/test.csv"
+trainfolder        : "/path/to/volumes/train"
+validfolder        : "/path/to/volumes/valid"
+testfolder         : "/path/to/volumes/test"
+
+save_dir           : '/path/to/save/directory'
+
+resume             : null
+validate_every     : 1
+generate_number    : 10
+
+n_outputs           : 18

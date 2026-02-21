@@ -1,0 +1,41 @@
+data:
+    dataset                 : "ctrate"
+    normalization           : "imagenet"
+    path_volumes_train      : "/path/to/volumes/train"
+    path_volumes_val        : "/path/to/volumes/val"
+    path_volumes_test       : "/path/to/volumes/test"
+    path_labels_train       : "/path/to/labels/train.csv"
+    path_labels_val         : "/path/to/labels/val.csv"
+    path_labels_test        : "/path/to/labels/test.csv"
+    path_reports            : "/path/to/reports/reports.csv"
+    path_metadata           : "/path/to/metadata.csv"
+    device                  : 'cpu'
+    flag_prompt             : 0
+parameters:
+    batch_size_train        : 4
+    batch_size_valid        : 4
+    batch_size_test         : 4
+    lr_heads                : 0.00001
+    lr_backbone             : 0.00001
+    epochs                  : 1
+    n_outputs               : 18
+config:
+    gpu_index               : "0"
+    num_workers             : 16
+    num_workers_valid       : 16
+    num_workers_test        : 16
+    persistent_workers      : True
+    persistent_workers_val  : True
+    persistent_workers_test : True
+model:
+    name                    : "ctnet"
+    path_resnet             : "/path/to/resnet18-f37072fd.pth"
+    flag_pretrain_ctnet     : True
+    path_ctnet              : "/path/to/pretrain/ctnet.pt"
+scheduler:
+    name                    : 'StepLR'
+    step_size               : 40
+    gamma                   : 0.5
+    warmup_length           : 200
+results:
+    path_folder             : '/path/to/results'
