@@ -12,7 +12,7 @@
 
 CT-AGRG employs a two-stage approach for anomaly detection and description generation. **Pretraining.** Initially, a visual feature extractor is pre-trained on a multi-label classification task.  **Step1.** In the first stage, the visual encoder is fine-tuned with multi-task learning, with one classification head per anomaly.  **Step2.** If an anomaly is detected, its associated vector representation is then passed to the second stage. Here, a pre-trained GPT-2 model generates a descriptive text of the identified anomaly.
 
-<img src="https://github.com/theodpzz/ct-agrg/blob/main/figures/method_overview.jpg" alt="Method overview" width="900">
+<img src="https://github.com/theodpzz/ct-agrg/blob/master/figures/method_overview.jpg" alt="Method overview" width="900">
 
 ### 🚀 Getting Started
 
