@@ -14,6 +14,8 @@ CT-AGRG employs a two-stage approach for anomaly detection and description gener
 
 <img src="https://github.com/theodpzz/ct-agrg/blob/master/figures/method_overview.jpg" alt="Method overview" width="900">
 
+---
+
 ### 🚀 Getting Started
 
 #### 1. Clone the Repository
@@ -49,19 +51,27 @@ Training is organized per step. Please, navigate to the corresponding folder and
 
 An inference notebook is available at **./notebook/demo.ipynb**.
 
+---
+
 ### ⚙️ CT Scan Processing
 
 CT scans are reformated such that the first axis points from Inferior to Superior, the second from Right to Left, and the third from Anterior to Posterior (SLP). The voxel spacing is (z, x, y) = (1.5, 0.75, 0.75) millimeters. The Hounsfield Units are clipped to [-1000, +200], and mapped to the range [0, 1] before normalization using ImageNet statistic (-0.449).
 
 <img src="https://github.com/theodpzz/ct-scroll/blob/master/figures/orientation.png" alt="Orientation" width="900">
 
+---
+
 ### 🔥 Available resources
 
 CT-AGRG pretrained weights on CT-RATE are available at 🤗 [https://huggingface.co/theodpzz/ct-agrg](https://huggingface.co/theodpzz/ct-agrg).
 
+---
+
 ### 🙌 Acknowledgement
 
 CT-AGRG implementations builds upon prior work, including [RGRG](https://github.com/ttanida/rgrg), [CT-Net](https://github.com/rachellea) and [CT-CLIP](https://github.com/ibrahimethemhamamci/CT-CLIP). We thank the authors of these projects, as well as the contributors of [CT-RATE](https://arxiv.org/abs/2403.17834v3) for releasing the dataset to the research community.
+
+---
 
 ## 📎Citation
 
