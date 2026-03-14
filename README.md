@@ -42,7 +42,7 @@ For step 2 (report generation), download the pretrained GPT-2 weights from: 🤗
 
 CT-AGRG was trained and evaluated on the [CT-RATE dataset](https://huggingface.co/datasets/ibrahimhamamci/CT-RATE).
 
-**Important**: For each abnormality, the corresponding sentence must be extracted from the report. This can be done using the RadBERT labeler provided in the original CT-RATE release.
+**Important**: For each abnormality, the corresponding sentence must be extracted from the report. This can be done using the [RadBERT labeler](https://huggingface.co/datasets/ibrahimhamamci/CT-RATE/blob/main/models/RadBertClassifier.pth) provided in the original CT-RATE release.
 
 #### 5. Training
 
