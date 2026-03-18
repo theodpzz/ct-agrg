@@ -48,7 +48,7 @@ CT-AGRG was trained and evaluated on the [CT-RATE dataset](https://huggingface.c
 
 Training is organized per step. Please, navigate to the corresponding folder and follow the provided instructions inside each directory.
 
-#### 6. Demo
+#### 6. Inference Demo
 
 An inference notebook is available at **./notebook/demo.ipynb**.
 
