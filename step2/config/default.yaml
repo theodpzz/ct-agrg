@@ -44,6 +44,7 @@ gamma              : 0.1
 path_labels_train  : "/path/to/folder/labels/train.csv"
 path_labels_valid  : "/path/to/folder/labels/valid.csv"
 path_labels_test   : "/path/to/folder/labels/test.csv"
+path_metadata      : "/path/to/metadata.csv"
 trainfolder        : "/path/to/volumes/train"
 validfolder        : "/path/to/volumes/valid"
 testfolder         : "/path/to/volumes/test"
