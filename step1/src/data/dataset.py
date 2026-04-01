@@ -126,6 +126,30 @@ class CTVolumeDataset(Dataset):
     def __len__(self):
         return len(self.samples)
 
+    def reformat_spacing(
+        self,
+        tensor: torch.tensor,
+        current_spacing: tuple,
+        target_spacing: tuple
+        ) -> torch.tensor:
+        '''
+        Adjust spacing from CT scan.
+    
+        tensor: (C, H, W)
+        current_spacing: (z, x, y) mm.
+        target_spacing: (z, x, y) mm.
+        '''
+        if tensor.dim() == 3:
+            tensor = tensor.unsqueeze(0).unsqueeze(0)
+    
+        original_shape = tensor.shape[2:]
+        new_shape = [
+            int(original_shape[i] * current_spacing[i] / target_spacing[i])
+            for i in range(len(original_shape))
+        ]
+        tensor = F.interpolate(tensor, size=new_shape, mode='trilinear', align_corners=False)
+        return tensor.squeeze()
+    
     def nii_img_to_tensor(
         self, 
         path: str,
