@@ -224,7 +224,7 @@ class CTVolumeDataset(Dataset):
     def get_labels(self, nii_file):
         
         # extract id of patient
-        id_ = os.path.basename(nii_file)[:-4]
+        id_ = os.path.basename(nii_file)
 
         # extract label
         labels = self.df_labels[self.df_labels.VolumeName == id_][self.labels_names].values[0]
