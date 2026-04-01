@@ -126,42 +126,83 @@ class CTVolumeDataset(Dataset):
     def __len__(self):
         return len(self.samples)
 
-    def nii_img_to_tensor(self, path, dd=240, dh=480, dw=480):
+    def reformat_spacing(
+        self,
+        tensor: torch.tensor,
+        current_spacing: tuple,
+        target_spacing: tuple
+        ) -> torch.tensor:
+        '''
+        Adjust spacing from CT scan.
+    
+        tensor: (C, H, W)
+        current_spacing: (z, x, y) mm.
+        target_spacing: (z, x, y) mm.
+        '''
+        if tensor.dim() == 3:
+            tensor = tensor.unsqueeze(0).unsqueeze(0)
+    
+        original_shape = tensor.shape[2:]
+        new_shape = [
+            int(original_shape[i] * current_spacing[i] / target_spacing[i])
+            for i in range(len(original_shape))
+        ]
+        tensor = F.interpolate(tensor, size=new_shape, mode='trilinear', align_corners=False)
+        return tensor.squeeze()
+    
+    def nii_img_to_tensor(
+        self, 
+        path: str,
+        slope: float,
+        intercept: float,
+        current_spacing: tuple,
+        target_spacing: tuple = (1.5, 0.75, 0.75),
+        size: tuple = (240, 480, 480),
+        ):
 
-        # Warning: To adjust 
-        # Assuming that the CT scan is already formatted with SLP orientation with HU values
-        array = np.load(path)['arr_0']
+        # Load raw CT scan as array
+        array = nib.load(path).get_fdata() # [H, W, C]
     
         # Array to tensor
-        tensor = torch.tensor(array)
+        tensor = torch.as_tensor(array, dtype=torch.float32) # [H, W, C]
+    
+        # Apply slope and intercept to obtain Hounsfield Units
+        tensor = tensor.mul_(slope).add_(intercept) # [H, W, C]
+
+        # Reformat to SLP orientation
+        tensor = tensor.permute(2, 0, 1) # [C, H, W]
+    
+        # Spacing
+        tensor = reformat_spacing(tensor, current_spacing, target_spacing) # [C, H, W]
     
         # Clip Hounsfield Units to [-1000, +200]
-        tensor = torch.clip(tensor, -1000., +200.)
-    
+        tensor = torch.clip(tensor, -1000., +200.) # [C, H, W]
+
         # Shift to [0, +1200]
-        tensor = tensor + torch.tensor(+1000., dtype=torch.float32)
+        tensor = tensor.add_(1000.) # [C, H, W]
     
         # Map [0, +1200] to [0, 1]
-        tensor = tensor / torch.tensor(+1200., dtype=torch.float32)
+        tensor = tensor.div_(1200.) # [C, H, W]
     
         # ImageNet Normalization
-        tensor = tensor + torch.tensor(-0.449, dtype=torch.float32)
-        
-        # extract dimensions
+        tensor = tensor.sub_(0.449) # [C, H, W]
+
+        # CT scan current size
         d, h, w = tensor.shape
+        # CT scan target size
+        (dd, dh, dw) = size
+    
+        # Crop
+        h_start = max((h - dh) // 2, 0)
+        h_end   = min(h_start + dh, h)
+        w_start = max((w - dw) // 2, 0)
+        w_end   = min(w_start + dw, w)
+        d_start = max((d - dd) // 2, 0)
+        d_end   = min(d_start + dd, d)
+    
+        tensor = tensor[d_start:d_end, h_start:h_end, w_start:w_end] # [C, H, W]
 
-        # calculate cropping values for height, width, and depth
-        h_start    = max((h - dh) // 2, 0)
-        h_end      = min(h_start + dh, h)
-        w_start    = max((w - dw) // 2, 0)
-        w_end      = min(w_start + dw, w)
-        d_start    = max((d - dd) // 2, 0)
-        d_end      = min(d_start + dd, d)
-
-        # crop
-        tensor = tensor[d_start:d_end, h_start:h_end, w_start:w_end]
-
-        # # calculate padding values for height, width, and depth
+        # Pad
         pad_h_before = (dh - tensor.size(1)) // 2
         pad_h_after  = dh - tensor.size(1) - pad_h_before
         pad_w_before = (dw - tensor.size(2)) // 2
@@ -169,12 +210,15 @@ class CTVolumeDataset(Dataset):
         pad_d_before = (dd - tensor.size(0)) // 2
         pad_d_after  = dd - tensor.size(0) - pad_d_before
 
-        # pad
-        tensor = torch.nn.functional.pad(tensor, (pad_w_before, pad_w_after, pad_h_before, pad_h_after, pad_d_before, pad_d_after), value=-0.449)
-
-        # unsqueeze
-        tensor = tensor.unsqueeze(0)
-
+        tensor = torch.nn.functional.pad(
+            input = tensor, 
+            pad   = (pad_w_before, pad_w_after, pad_h_before, pad_h_after, pad_d_before, pad_d_after), 
+            value = -0.449
+        ) # [C, H, W]
+    
+        # Unsqueeze to add the 1-channel axis
+        tensor = tensor.unsqueeze(0) # [1, C, H, W]
+      
         return tensor
 
     def get_labels(self, nii_file):
@@ -187,6 +231,14 @@ class CTVolumeDataset(Dataset):
 
         return id_, torch.from_numpy(labels)
 
+    def get_metadata(self, nii_file):
+        id_ = os.path.basename(nii_file)
+        z_spacing = self.metadata.loc[self.metadata.VolumeName == id_].ZSpacing.values[0]
+        x_spacing, y_spacing = self.metadata.loc[self.metadata.VolumeName == id_].XZSpacing.values[0]
+        current_spacing = (z_spacing, x_spacing, y_spacing)
+        slope = self.metadata.loc[self.metadata.VolumeName == id_].RescaleSlope.values[0]
+        intercept = self.metadata.loc[self.metadata.VolumeName == id_].RescaleIntercept.values[0]
+        return slope, intercept, current_spacing
         
     def __getitem__(self, index):
 
@@ -194,7 +246,8 @@ class CTVolumeDataset(Dataset):
         nii_file = self.samples[index]
 
         # load volume and perform transformation
-        video_tensor = self.nii_to_tensor(nii_file)
+        slope, intercept, current_spacing = self.get_metadata(nii_file)
+        video_tensor = self.nii_to_tensor(nii_file, slope, intercept, current_spacing)
 
         # load labels
         id_, labels = self.get_labels(nii_file)
