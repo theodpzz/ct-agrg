@@ -14,6 +14,10 @@ CT-AGRG employs a two-stage approach for anomaly detection and description gener
 
 <img src="https://github.com/theodpzz/ct-agrg/blob/main/figures/method_overview.jpg" alt="Method overview" width="900">
 
+  > #### **CT-AGRG: Automated Abnormality-Guided Report Generation for CT Scans**<be>  
+  >IEEE International Symposium on Biomedical Imaging (ISBI) 2025  
+  >Theo Di Piazza, Carole Lazarus, Olivier Nempont, Loic Boussel
+
 ---
 
 ### Notice
